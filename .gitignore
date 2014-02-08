@@ -1,3 +1,7 @@
+trakt_login.py
+.upnpDevices
+episodes.db
+
 *.py[cod]
 
 # C extensions
