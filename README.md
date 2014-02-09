@@ -25,7 +25,7 @@ As I was unable to find a Python package for monitoring UPnP devices, UPnPtrakt 
 
 ```shell
 brew install djmount
-````
+```
 or (Ubuntu)
 
 ```shell
@@ -51,22 +51,23 @@ Manually test mounting UPnP devices by calling
 mkdir test
 djmount test
 ll test
-umount test; rm -rf test```
+umount test; rm -rf test
+```
 If you get an error you might need to load the FUSE kernel module first: `modprobe fuse`)
 ## Usage
 Calling `upnptrakt.py -h` should be pretty much self-explanatory. The default values are tuned for my personal case, you might need to customize them in the call to the script. Especially the `--path-to-last-viewed` is probably different for your UPnP/DLNA server (or not, if you're running Serviio on a host named Andisk2…).
 
 Let's get through the parameters, sorted by importance (and then through the flags):
 
-* **--path-to-last-viewed *PATH***: The path to the *last viewed* folder of your UPnP/DLNA server. You probably need to find this out by running a manual `djmount` (see **Setup**). Don't care too much about trailing / ending slashes. This should be taken care of automatically.  
+* **--path-to-last-viewed _PATH_**: The path to the *last viewed* folder of your UPnP/DLNA server. You probably need to find this out by running a manual `djmount` (see **Setup**). Don't care too much about trailing / ending slashes. This should be taken care of automatically.  
 *Default*: `Serviio (Andisk2)/Video/Last Viewed`. 
-* **--trakt-config-json *FILE***: Filename of the json config used to login to trakt.tv. See **Setup**.  
+* **--trakt-config-json _FILE_**: Filename of the json config used to login to trakt.tv. See **Setup**.  
 *Default*: `trakt-config.json`
-* **--series-whitelist-json *FILE***: Sometimes the trakt.tv search is unable to finde the current show. Put it into this whitelist then.  
+* **--series-whitelist-json _FILE_**: Sometimes the trakt.tv search is unable to finde the current show. Put it into this whitelist then.  
 *Default*: `seriesWhitelist.json`
-* **--database-file *FILE***: SQLite3 database filename to store all episode information in.  
+* **--database-file _FILE_**: SQLite3 database filename to store all episode information in.  
 *Default*: `episodes.db`
-* **--mount-path *PATH***: Location, where `djmount` will mount the UPnP network surroundings in.  
+* **--mount-path _PATH_**: Location, where `djmount` will mount the UPnP network surroundings in.  
 *Default*: `.upnpDevices` (yes, it's hidden)
 
 Flags provided (all off by default):
@@ -80,4 +81,5 @@ After setting up all needed tools, creating and initial-filling your databse, yo
 ## Limits & Todos
 * At the moment the load to trakt.tv is quite high, as every episode's proper data is retrieved from there. Resulting in a slow script. This is going to be changed soon. Hopefully.
 * No error handling whatsoever is included. No logging either.
+* No documentation in the files.
 * Take a look to [issues](https://github.com/AndiH/UPnPtrakt/issues) for what I plan to do next. Also, report them over there (or, much better, send me a pull request).
