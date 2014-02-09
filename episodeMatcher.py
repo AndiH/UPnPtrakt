@@ -1,9 +1,6 @@
 import guessit
 import re
 
-samplestring = 'Brooklyn Nine-Nine (1_15): Operation: Broken Feather.mkv'
-# samplestring = 'Teen.Wolf.S03E17.720p.HDTV.x264-2HD'
-
 def getEpisodeInfo(rawString, reString='(.+)\((\d{1,2})\_(\d{1,2})\):'):
 	name = season = episode = None 
 	p = re.compile(reString)
@@ -21,5 +18,3 @@ def getEpisodeInfo(rawString, reString='(.+)\((\d{1,2})\_(\d{1,2})\):'):
 			season = int(guessed['season'])
 			episode = int(guessed['episodeNumber'])
 	return (name, season, episode)
-
-# print getEpisodeInfo(samplestring)
