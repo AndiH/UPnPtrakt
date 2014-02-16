@@ -57,12 +57,13 @@ def initializeTraktConnection(config):
 	trakt.tv.setup(apikey=_TRAKTAPIKEY, username=config['username'], password=config['password'])
 
 def getTraktEpisodeInfo(showName, seasonNumber, episodeNumber, seriesWhitelist):
-	print showName, seasonNumber, episodeNumber
+	# print showName, seasonNumber, episodeNumber
 	if (showName in seriesWhitelist):
 		showTvDbId = seriesWhitelist[showName]
 	else: 
+		showName = showName.replace("(", "").replace(")", "")
 		showTvDbId = trakt.tv.search.shows(showName)[0]['tvdb_id']
-	print showName, showTvDbId, seasonNumber, episodeNumber
+	# print showName, showTvDbId, seasonNumber, episodeNumber
 	episode = trakt.tv.show.episode(showTvDbId, seasonNumber, episodeNumber)
 	return (episode['show']['title'], showTvDbId, seasonNumber, episodeNumber, episode['episode']['title'], episode['episode']['tvdb_id'])
 
