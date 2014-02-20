@@ -56,12 +56,14 @@ def initializeTraktConnection(config):
 	config['password'] = sha1(config['password']).hexdigest()
 	trakt.tv.setup(apikey=_TRAKTAPIKEY, username=config['username'], password=config['password'])
 
-def getTraktEpisodeInfo(showName, seasonNumber, episodeNumber, seriesWhitelist):
+def getTraktEpisodeInfo(showName, seasonNumber, episodeNumber, seriesWhitelist, seriesMismatched):
 	# print showName, seasonNumber, episodeNumber
+	if (showName in seriesMismatched):
+		showName = seriesMismatched[showName]
 	if (showName in seriesWhitelist):
 		showTvDbId = seriesWhitelist[showName]
 	else: 
-		showName = showName.replace("(", "").replace(")", "")
+		showName = showName.replace("(", "").replace(")", "").replace(":", "")
 		showTvDbId = trakt.tv.search.shows(showName)[0]['tvdb_id']
 	# print showName, showTvDbId, seasonNumber, episodeNumber
 	episode = trakt.tv.show.episode(showTvDbId, seasonNumber, episodeNumber)
@@ -97,7 +99,8 @@ def main(args):
 	traktCredentials = jsonParser(args.trakt_config_json)
 	initializeTraktConnection(traktCredentials)
 	seriesWhitelist = jsonParser(args.series_whitelist_json)
-	episodes = [getTraktEpisodeInfo(episode[0], episode[1], episode[2], seriesWhitelist=seriesWhitelist) for episode in rawEpisodes]
+	seriesMismatched = jsonParser(args.series_mismatched_json)
+	episodes = [getTraktEpisodeInfo(episode[0], episode[1], episode[2], seriesWhitelist=seriesWhitelist, seriesMismatched=seriesMismatched) for episode in rawEpisodes]
 	newEpisodes = updateDatabase(episodes, args)
 	if (args.dont_post):
 		if (newEpisodes == []):
@@ -119,6 +122,7 @@ if __name__ == '__main__':
 	parser.add_argument('--database-file', type=str, default="episodes.db", help="Database file name.")
 	parser.add_argument('--trakt-config-json', type=str, default="trakt-config.json", help="Trakt.tv login and API credentials JSON file.")
 	parser.add_argument('--series-whitelist-json', type=str, default="seriesWhitelist.json", help="File with list of TVDB IDs of shows which just won't parse properly through trakt.tv's search.")
+	parser.add_argument('--series-mismatched-json', type=str, default="seriesMismatched.json", help="Sometimes, your UPnP server displays the wrong show name. This file provides the proper names for mismatched ones.")
 	# add parser argument to pass custom regex string for episode matching
 	# add ability to parse all parameters from json file
 	args = parser.parse_args()
