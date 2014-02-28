@@ -39,7 +39,7 @@ def updateDatabase(episodes, args):
 	newEpisodes = []
 	with dbConnection:
 		dbCursor = dbConnection.cursor()
-		dbCursor.execute("SELECT (episodetvdbid) from episodes order by id DESC limit 15")
+		dbCursor.execute("SELECT (episodetvdbid) from episodes order by id DESC limit 200")
 		ids = dbCursor.fetchall()
 		ids = [id[0] for id in ids]
 		# print ids, episodes[-1]
@@ -57,7 +57,7 @@ def initializeTraktConnection(config):
 	trakt.tv.setup(apikey=_TRAKTAPIKEY, username=config['username'], password=config['password'])
 
 def getTraktEpisodeInfo(showName, seasonNumber, episodeNumber, seriesWhitelist, seriesMismatched):
-	# print showName, seasonNumber, episodeNumber
+	print showName, seasonNumber, episodeNumber
 	if (showName in seriesMismatched):
 		showName = seriesMismatched[showName]
 	if (showName in seriesWhitelist):
@@ -65,7 +65,7 @@ def getTraktEpisodeInfo(showName, seasonNumber, episodeNumber, seriesWhitelist, 
 	else: 
 		showName = showName.replace("(", "").replace(")", "").replace(":", "")
 		showTvDbId = trakt.tv.search.shows(showName)[0]['tvdb_id']
-	# print showName, showTvDbId, seasonNumber, episodeNumber
+	print showName, showTvDbId, seasonNumber, episodeNumber
 	episode = trakt.tv.show.episode(showTvDbId, seasonNumber, episodeNumber)
 	return (episode['show']['title'], showTvDbId, seasonNumber, episodeNumber, episode['episode']['title'], episode['episode']['tvdb_id'])
 
