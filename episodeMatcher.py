@@ -13,7 +13,7 @@ def getEpisodeInfo(rawString, reString='(.+)\((\d{1,2})\_(\d{1,2})\):'):
 		if (not ('mkv' in rawString)):
 			rawString = rawString + str('.mkv')
 		guessed = guessit.guess_video_info(rawString)
-		if (guessed['type'] == 'episode'):
+		if (guessed['type'] == 'episode' and guessed.has_key('season')):
 			name = str(guessed['series'])
 			season = int(guessed['season'])
 			episode = int(guessed['episodeNumber'])
