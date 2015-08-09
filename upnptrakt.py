@@ -9,65 +9,27 @@ import sqlite3 as sql
 import datetime
 import djmountHandler
 import episodeMatcher
-import trakt.tv
-
-_TRAKTAPIKEY = "09d55b38efb03d4ee5665aa1fb417f260a76d75a"
-
-def postNewEpisodesToTrakt(newEpisodes, traktCredentials):
-	apiMethod = "%s/%s/" % ("show", "scrobble")
-	apiCall = apiMethod + _TRAKTAPIKEY
-	data = {'username': traktCredentials['username'], 'password': traktCredentials['password']}
-	for episode in newEpisodes:
-		data['title'] = episode[0]
-		data['tvdb_id'] = episode[1]
-		data['season'] = episode[2]
-		data['episode'] = episode[3]
-		data['title'] = episode[4]
-		data['episode_tvdb_id'] = episode[5]
-		# data['year'] = 2014
-		# encodedData = json.dumps(data)
-		resp = requests.post("http://api.trakt.tv/" + apiCall, data)
-		parsedResp = resp.json()
-		# print parsedResp
-		if not (parsedResp['status'] == 'success'):
-			print "Error:", parsedResp['error']
-		if (parsedResp['status'] == 'success'):
-			print parsedResp['message']
+from trakt import init, core, tv
+import trakt
+import traktHandler
 
 def updateDatabase(episodes, args):
 	dbConnection = sql.connect(args.database_file)
 	newEpisodes = []
 	with dbConnection:
 		dbCursor = dbConnection.cursor()
-		dbCursor.execute("SELECT (episodetvdbid) from episodes order by id DESC limit 15")
+		dbCursor.execute("SELECT (episodeid) from episodes order by id DESC limit 40")
 		ids = dbCursor.fetchall()
 		ids = [id[0] for id in ids]
-		# print ids, episodes[-1]
+		# print ids, episodes[1][-1]
 		for episode in episodes:
 			if not (episode[-1] in ids):
 				newEpisodes.append(episode)
 				if not (args.dont_store):
-					dbCursor.execute("INSERT INTO episodes (date, seriesname, seriestvdbid, season, episode, episodetitle, episodetvdbid) VALUES (?,?,?,?,?,?,?)", (int(datetime.datetime.now().strftime("%s")),) + episode)
+					dbCursor.execute("INSERT INTO episodes (date, seriesname, seriesid, season, episode, episodetitle, episodeid) VALUES (?,?,?,?,?,?,?)", (int(datetime.datetime.now().strftime("%s")),) + episode)
 					print "Inserted", episode
 		dbConnection.commit()
 	return newEpisodes
-
-def initializeTraktConnection(config):
-	config['password'] = sha1(config['password']).hexdigest()
-	trakt.tv.setup(apikey=_TRAKTAPIKEY, username=config['username'], password=config['password'])
-
-def getTraktEpisodeInfo(showName, seasonNumber, episodeNumber, seriesWhitelist, seriesMismatched):
-	# print showName, seasonNumber, episodeNumber
-	if (showName in seriesMismatched):
-		showName = seriesMismatched[showName]
-	if (showName in seriesWhitelist):
-		showTvDbId = seriesWhitelist[showName]
-	else: 
-		showName = showName.replace("(", "").replace(")", "").replace(":", "")
-		showTvDbId = trakt.tv.search.shows(showName)[0]['tvdb_id']
-	# print showName, showTvDbId, seasonNumber, episodeNumber
-	episode = trakt.tv.show.episode(showTvDbId, seasonNumber, episodeNumber)
-	return (episode['show']['title'], showTvDbId, seasonNumber, episodeNumber, episode['episode']['title'], episode['episode']['tvdb_id'])
 
 def jsonParser(file):
 	data_file = open(file)
@@ -96,11 +58,12 @@ def main(args):
 
 	files = getLastViewedContent(path)
 	rawEpisodes = getEpisodesFromFiles(files)
-	traktCredentials = jsonParser(args.trakt_config_json)
-	initializeTraktConnection(traktCredentials)
+	# traktCredentials = jsonParser(args.trakt_config_json)
+	# initializeTraktConnection(traktCredentials)
 	seriesWhitelist = jsonParser(args.series_whitelist_json)
 	seriesMismatched = jsonParser(args.series_mismatched_json)
-	episodes = [getTraktEpisodeInfo(episode[0], episode[1], episode[2], seriesWhitelist=seriesWhitelist, seriesMismatched=seriesMismatched) for episode in rawEpisodes]
+	episodes = [traktHandler.getTraktEpisodeInfo(episode[0], episode[1], episode[2], seriesWhitelist=seriesWhitelist, seriesMismatched=seriesMismatched) for episode in rawEpisodes]
+	episodes = [traktHandler.getTraktEpisodeInfoFlat(e) for e in episodes]
 	newEpisodes = updateDatabase(episodes, args)
 	if (args.dont_post):
 		if (newEpisodes == []):
@@ -110,7 +73,7 @@ def main(args):
 			for episode in newEpisodes:
 				print episode
 	else: # not (args.dont_post)
-		postNewEpisodesToTrakt(newEpisodes, traktCredentials)
+		traktHandler.postNewEpisodesToTrakt(newEpisodes)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Monitors a UPnP Last Viewed folder for changes, writes into a database and posts to trakt.tv.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
