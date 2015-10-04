@@ -64,13 +64,13 @@ def main(args):
 	# initializeTraktConnection(traktCredentials)
 	seriesWhitelist = jsonParser(args.series_whitelist_json)
 	seriesMismatched = jsonParser(args.series_mismatched_json)
-	episodes = [traktHandler.getTraktEpisodeInfo(episode[0], episode[1], episode[2], seriesWhitelist=seriesWhitelist, seriesMismatched=seriesMismatched) for episode in rawEpisodes]
+	traktInterface = traktHandler.traktHandler(args)
+	episodes = [traktInterface.getTraktEpisodeInfo(episode[0], episode[1], episode[2], seriesWhitelist=seriesWhitelist, seriesMismatched=seriesMismatched) for episode in rawEpisodes]
 	if (args.verbose):
 		print "Processed Episodes: ", episodes
-	episodes = [traktHandler.getTraktEpisodeInfoFlat(e) for e in episodes]
+	episodes = [traktInterface.getTraktEpisodeInfoFlat(e) for e in episodes]
 	if (args.verbose):
-		print "Processed, Strippd Episodes: ", episodes
-	episodes = [traktHandler.getTraktEpisodeInfoFlat(e) for e in episodes]
+		print "Processed, Stripped Episodes: ", episodes
 	newEpisodes = updateDatabase(episodes, args)
 	if (args.verbose):
 		print "New Episodes: ", newEpisodes
@@ -82,7 +82,7 @@ def main(args):
 			for episode in newEpisodes:
 				print episode
 	else: # not (args.dont_post)
-		traktHandler.postNewEpisodesToTrakt(newEpisodes)
+		traktInterface.postNewEpisodesToTrakt(newEpisodes)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Monitors a UPnP Last Viewed folder for changes, writes into a database and posts to trakt.tv.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
