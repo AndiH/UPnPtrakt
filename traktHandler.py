@@ -32,6 +32,9 @@ class traktHandler(object):
 				show = trakt.tv.search(showName, search_type="show")[0]
 			except IndexError:
 				print "##FAIL## Show", showName, "was not found"
+				# Send an email?
+				# Setup: http://askubuntu.com/questions/522431/how-to-send-an-email-using-command-line
+				# Mail: https://pypi.python.org/pypi/mailtools/2
 		episode = self.getTraktEpisode(show, seasonNumber, episodeNumber)
 		if (self.verbose):
 			print "Show: ", show, "-- Episode:", episode
