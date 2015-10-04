@@ -13,29 +13,6 @@ from trakt import init, core, tv
 import trakt
 import traktHandler
 
-# _TRAKTAPIKEY = "497628651bd58c371c4cfd585665ad1fea65b9d4a61b198d8d5c6a83d87f0738"
-
-# def postNewEpisodesToTrakt(newEpisodes, traktCredentials):
-# 	apiMethod = "%s/%s/" % ("show", "scrobble")
-# 	apiCall = apiMethod + _TRAKTAPIKEY
-# 	data = {'username': traktCredentials['username'], 'password': traktCredentials['password']}
-# 	for episode in newEpisodes:
-# 		data['title'] = episode[0]
-# 		data['tvdb_id'] = episode[1]
-# 		data['season'] = episode[2]
-# 		data['episode'] = episode[3]
-# 		data['title'] = episode[4]
-# 		data['episode_tvdb_id'] = episode[5]
-# 		# data['year'] = 2014
-# 		# encodedData = json.dumps(data)
-# 		resp = requests.post("https://api.trakt.tv/" + apiCall, data)
-# 		parsedResp = resp.json()
-# 		# print parsedResp
-# 		if not (parsedResp['status'] == 'success'):
-# 			print "Error:", parsedResp['error']
-# 		if (parsedResp['status'] == 'success'):
-# 			print parsedResp['message']
-
 def updateDatabase(episodes, args):
 	dbConnection = sql.connect(args.database_file)
 	newEpisodes = []
@@ -53,23 +30,6 @@ def updateDatabase(episodes, args):
 					print "Inserted", episode
 		dbConnection.commit()
 	return newEpisodes
-
-# def initializeTraktConnection(config):
-# 	config['password'] = sha1(config['password']).hexdigest()
-# 	trakt.tv.setup(apikey=_TRAKTAPIKEY, username=config['username'], password=config['password'])
-
-# def getTraktEpisodeInfo(showName, seasonNumber, episodeNumber, seriesWhitelist, seriesMismatched):
-# 	# print showName, seasonNumber, episodeNumber
-# 	if (showName in seriesMismatched):
-# 		showName = seriesMismatched[showName]
-# 	if (showName in seriesWhitelist):
-# 		showTvDbId = seriesWhitelist[showName]
-# 	else: 
-# 		showName = showName.replace("(", "").replace(")", "").replace(":", "")
-# 		showTvDbId = trakt.tv.search.shows(showName)[0]['tvdb_id']
-# 	# print showName, showTvDbId, seasonNumber, episodeNumber
-# 	episode = trakt.tv.show.episode(showTvDbId, seasonNumber, episodeNumber)
-# 	return (episode['show']['title'], showTvDbId, seasonNumber, episodeNumber, episode['episode']['title'], episode['episode']['tvdb_id'])
 
 def jsonParser(file):
 	data_file = open(file)
@@ -110,6 +70,7 @@ def main(args):
 	episodes = [traktHandler.getTraktEpisodeInfoFlat(e) for e in episodes]
 	if (args.verbose):
 		print "Processed, Strippd Episodes: ", episodes
+	episodes = [traktHandler.getTraktEpisodeInfoFlat(e) for e in episodes]
 	newEpisodes = updateDatabase(episodes, args)
 	if (args.verbose):
 		print "New Episodes: ", newEpisodes

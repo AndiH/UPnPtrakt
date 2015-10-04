@@ -6,7 +6,7 @@ UPnP devices are mounted into the file system (by means of [`djmount`](https://g
 
 Made for OS X and Linux.
 ## TL;DR
-Install needed stuff (see **Prerequisites**), fill in your trakt.tv credentials in `trakt-config.json`, watch something new and run
+Install needed stuff (see **Prerequisites**), initialize the trakt.tv connection (see [PyTrakt docu](http://pytrakt.readthedocs.org/en/latest/getstarted.html)), watch something new and run
 
 ```shell
 ./upnptrakt.py
@@ -15,7 +15,7 @@ Install needed stuff (see **Prerequisites**), fill in your trakt.tv credentials 
 ## Features
 UPnPtrakt tracks your last viewed shows as indicated by your UPnP/DLNA devices. It parses the show, retrieves proper (meta) data from trakt.tv and fills up a database. New shows are checked in to trakt.tv.
 
-`upnptrakt.py` has quite a few features accessable while calling, just check `./upnptrakt.py --help`.
+`upnptrakt.py` has quite a few features accessible while calling, just check `./upnptrakt.py --help`.
 ## Prerequisites
 There's some stuff which has to be on your system in order for UPnPtrakt to work.
 ### Program: djmount
@@ -38,14 +38,19 @@ This Python program uses quite a few packages. All of them can be installed via 
 
 ```shell
 pip install guessit psutil simplejson  
-pip install git+https://github.com/z4r/python-trakt
+pip install trakt
 ```
 
+Note: I changed the Python trakt interface for v0.2 of UPnPtrakt.
+
 ## Setup
+### Database
 Use `createLocalDb.py` to create the necessary SQLite3 database. Use `--dropDB` to drop the databasse before recreating it.
 
-Rename `trakt-config.example.json` to your likings, e.g. `trakt-config.json`, and insert your trakt.tv credentials . The `apikey` is really not needed any more. (Only, if you don't want to post to trakt.tv but merely get some show episode information and don't want to rely on UPnPtrakt's dev API key. But why would you?)
+### Trakt Connection
+Use the setup description of [PyTrakt](http://pytrakt.readthedocs.org/en/latest/getstarted.html) to setup your trakt connection. You need to register an app with trakt and use OAuth for the authentication in the Python library. Chose `init()` with the `store=True` option so that PyTrakt stores your credentials in `~\.pytrakt.json`. UPnPtrakt is designed to run this way.
 
+### UPnP
 Manually test mounting UPnP devices by calling
 ```shell
 mkdir test
@@ -54,6 +59,7 @@ ll test
 umount test; rm -rf test
 ```
 If you get an error you might need to load the FUSE kernel module first: `modprobe fuse`)
+
 ## Usage
 Calling `upnptrakt.py -h` should be pretty much self-explanatory. The default values are tuned for my personal case, you might need to customize them in the call to the script. Especially the `--path-to-last-viewed` is probably different for your UPnP/DLNA server (or not, if you're running Serviio on a host named Andisk2…).
 
@@ -83,3 +89,4 @@ After setting up all needed tools, creating and initial-filling your databse, yo
 * No error handling whatsoever is included. No logging either.
 * No documentation in the files.
 * Take a look to [issues](https://github.com/AndiH/UPnPtrakt/issues) for what I plan to do next. Also, report them over there (or, much better, send me a pull request).
+* Feature-laziness
